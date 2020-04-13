@@ -1,0 +1,54 @@
+version: '3'
+services: 
+    app:
+        build: 
+            context: .
+        #user: "${UID}:${GID}"
+        ports: 
+            - 80:80
+        environment: 
+            - APACHE_DOCUMENT_ROOT=/var/www/html/app/public
+        volumes:
+            - .:/var/www/html/:rw
+            - ./config/vhost.conf:/etc/apache2/sites-available/000-default.conf
+            - vendor:/var/www/html/app/vendor
+            - cache:/var/www/html/app/var/cache
+            - log:/var/www/html/app/var/log
+        networks: 
+            - net_app
+            - net_back
+        
+
+    mysql:
+        image: mysql:5.7
+        environment:
+            #MYSQL_DATABASE: picojazz
+            #MYSQL_USER: picojazz
+            #MYSQL_PASSWORD: picojazz
+            MYSQL_ROOT_PASSWORD: 'rootuse'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        volumes:
+            - db:/var/lib/mysql
+        networks:
+            - net_back
+    
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:5.0.2
+        environment: 
+            - PMA_HOST=mysql
+            - PMA_PORT:3306
+        networks: 
+            - net_back
+        ports: 
+            - 4000:80
+        volumes:
+            - /sessions
+
+networks:  
+    net_app:
+    net_back:
+volumes: 
+    db:
+    vendor:
+    cache:
+    log:
